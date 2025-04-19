@@ -48,7 +48,7 @@ async def send_socket_catch_exception(function, message):
 @web.middleware
 async def cache_control(request: web.Request, handler):
     response: web.Response = await handler(request)
-    if request.path.endswith('.js') or request.path.endswith('.css'):
+    if request.path.endswith('.js') or request.path.endswith('.css') or request.path.endswith('index.json'):
         response.headers.setdefault('Cache-Control', 'no-cache')
     return response
 
@@ -735,6 +735,12 @@ class PromptServer():
         # Add routes from web extensions.
         for name, dir in nodes.EXTENSION_WEB_DIRS.items():
             self.app.add_routes([web.static('/extensions/' + name, dir)])
+
+        workflow_templates_path = FrontendManager.templates_path()
+        if workflow_templates_path:
+            self.app.add_routes([
+                web.static('/templates', workflow_templates_path)
+            ])
 
         self.app.add_routes([
             web.static('/', self.web_root),
